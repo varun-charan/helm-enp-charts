@@ -33,6 +33,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - shell: bash
+        run: |
+          pwd
+          ls -la 
+
       # - name: Create a Cache Artifactory List
       #   id: cache-artifactory-list
       #   uses: actions/cache@v3
@@ -51,10 +56,10 @@ jobs:
         shell: bash
         run: |
           function generateList() {
-              CHART_LIST=(`find ./helm-enp-charts/ -name Chart.yaml  |cut -f 3 -d "/"`)
+              CHART_LIST=(`find ../helm-enp-charts/ -name Chart.yaml  |cut -f 3 -d "/"`)
               for CHART in "${CHART_LIST[@]}"
               do
-                  CHART_VERSION=`grep ^version ./helm-enp-charts/$CHART/Chart.yaml | cut -f 2 -d " "`
+                  CHART_VERSION=`grep ^version ../helm-enp-charts/$CHART/Chart.yaml | cut -f 2 -d " "`
                   echo "${CHART}:${CHART_VERSION}"
               done
           }
