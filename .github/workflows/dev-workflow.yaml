@@ -22,7 +22,7 @@ jobs:
       - name: Setup Helm Repo
         shell: bash
         run: |
-          helm repo add barco https://bin.cloud.barco.com/artifactory/helm-enp --username=${ARTIFACTORY_USER} --password=$ARTIFACTORY_PWD
+          helm repo add barco https://bin.cloud.barco.com/artifactory/helm-enp --username=$ARTIFACTORY_USER --password=$ARTIFACTORY_PWD
         env:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PWD: ${{ secrets.ARTIFACTORY_PASSWORD }}
