@@ -27,6 +27,13 @@ jobs:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PWD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
+      - shell: bash
+        run: |
+          pwd
+          ls -la
+          helm repo list
+
+
   helm-prerequisites:
     runs-on: ubuntu-latest
     needs: [setup-infra]
