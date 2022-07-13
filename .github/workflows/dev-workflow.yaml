@@ -111,6 +111,16 @@ jobs:
         with:
           name: output-stashcharts-list
 
+      - name: Cat both lists
+        shell: bash
+        run: |
+          echo "Artifactory List"
+          cat artifactory.list
+          echo
+          echo "Stashchart List"
+          cat stashcharts.list
+          echo
+
       - name: Create Helm Packages
         shell: bash
         run: |
