@@ -37,7 +37,8 @@ jobs:
       - shell: bash
         run: |
           pwd
-          ls -la 
+          ls -la
+          helm repo list
 
       # - name: Create a Cache Artifactory List
       #   id: cache-artifactory-list
@@ -72,7 +73,7 @@ jobs:
           helm search repo barco/ | awk '{print $1":"$2}' | grep -v NAME | sed "s/barco\///g" | sed 's/[[:blank:]]*$//' | sed "s/\s\+/:/g" | sort > artifactory.list
           
           # Remove garbage from artifactory list if exists
-          sed -i '/No:results:found/d' artifactory.list  
+          sed -i '/No:results:found/d' artifactory.list
 
       - name: Verify that both lists are non-empty
         shell: bash
