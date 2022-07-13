@@ -90,10 +90,13 @@ jobs:
   helm-package:
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          find . -name "values.yaml"
+          
       - name: Update Secrets in Helm values.yaml file
         uses: microsoft/variable-substitution@v1 
         with:
-          files: 'cheeseshop-charts/values.yaml'
+          files: 'cheeseshop-chart/values.yaml'
         env:
           artifactoryAuth: ${{ secrets.ARTIFACTORY_AUTH }}
 
