@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: Setup Helm3
+      - name: Setup helm
         uses: azure/setup-helm@v3
 
       - name: Setup Helm Repo
@@ -68,7 +68,7 @@ jobs:
           generateList | sort > stashcharts.list
 
           # Get list of charts in Artifactory Helm Repo
-          helm3 search repo barco/ | awk '{print $1":"$2}' | grep -v NAME | sed "s/barco\///g" | sed 's/[[:blank:]]*$//' | sed "s/\s\+/:/g" | sort > artifactory.list
+          helm search repo barco/ | awk '{print $1":"$2}' | grep -v NAME | sed "s/barco\///g" | sed 's/[[:blank:]]*$//' | sed "s/\s\+/:/g" | sort > artifactory.list
           
           # Remove garbage from artifactory list if exists
           sed -i '/No:results:found/d' artifactory.list  
