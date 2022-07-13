@@ -1,0 +1,15 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+{{ include "app.labels" . | indent 4 }}
+{{ include "chart.labels" . | indent 4 }}
+  name: {{ template "fullname" . }}-service 
+spec:
+  selector:
+{{ include "app.selector" . | indent 4 }}
+  ports:
+    - port: {{ .Values.service.ports.port }}
+      protocol: TCP
+

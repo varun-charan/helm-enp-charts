@@ -1,0 +1,45 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+{{ include "app.labels" . | indent 4 }}
+{{ include "chart.labels" . | indent 4 }}
+  name: {{ template "fullname" . }}-deploy
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+{{ include "app.selector" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "app.labels" . | indent 8 }}
+{{ include "chart.labels" . | indent 8 }}
+    spec:
+      imagePullSecrets:
+        - name: artifactory-auth
+      containers:
+      - name: {{ template "fullname" . }}-container 
+        image: {{ template "container.image" .}}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  {{ .Values.container.ports.containerPort }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port:  {{ .Values.container.livenessProbe.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: {{ .Values.container.readinessProbe.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        env:
+        - name: PORT
+          value: {{ .Values.container.env.PORT | quote }}

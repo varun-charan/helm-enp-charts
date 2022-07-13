@@ -1,0 +1,114 @@
+name: helm-dev-ci-workflow
+
+on:
+  push:
+    branches:
+      - feature/*
+      - hotfix/*
+
+env:
+  HELM_REGISTRY: https://bin.cloud.barco.com/artifactory/helm-enp
+
+jobs:
+  setup-infra:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Setup Helm3
+        uses: azure/setup-helm@v3
+
+      - name: Setup Helm Repo
+        shell: bash
+        run: |
+          helm repo add barco https://bin.cloud.barco.com/artifactory/helm-enp --username=${ARTIFACTORY_USER} --password=$ARTIFACTORY_PWD
+        env:
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PWD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
+  helm-prerequisites:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # - name: Create a Cache Artifactory List
+      #   id: cache-artifactory-list
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: artifactory-list
+      #     key: ${{ runner.os }}-artifactory-list
+        
+      # - name: Create a Cache Artifactory List
+      #   id: cache-stashcharts-list
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: stashcharts-list
+      #     key: ${{ runner.os }}-stashcharts-list
+      
+      - name: Get list of charts in Artifactory and helm-enp-charts directory
+        shell: bash
+        run: |
+          function generateList() {
+              CHART_LIST=(`find ./helm-enp-charts/ -name Chart.yaml  |cut -f 3 -d "/"`)
+              for CHART in "${CHART_LIST[@]}"
+              do
+                  CHART_VERSION=`grep ^version ./helm-enp-charts/$CHART/Chart.yaml | cut -f 2 -d " "`
+                  echo "${CHART}:${CHART_VERSION}"
+              done
+          }
+
+          # Get list of charts in helm-enp-charts Git repo
+          generateList | sort > stashcharts.list
+
+          # Get list of charts in Artifactory Helm Repo
+          helm3 search repo barco/ | awk '{print $1":"$2}' | grep -v NAME | sed "s/barco\///g" | sed 's/[[:blank:]]*$//' | sed "s/\s\+/:/g" | sort > artifactory.list
+          
+          # Remove garbage from artifactory list if exists
+          sed -i '/No:results:found/d' artifactory.list  
+
+      - name: Verify that both lists are non-empty
+        shell: bash
+        run: |
+          if [[ -s stashcharts.list ]]; then
+              echo "stashcharts.list not empty"
+          else
+              printf "\nERROR: list of charts defined in Stash/Git (stashcharts.list) is empty. Exiting..\n\n"
+              exit 1
+          fi
+
+          if [[ -s artifactory.list ]]; then
+              echo "artifactory.list not empty"
+          else
+              printf "\nERROR: list of charts in Artifactory (artifactory.list) is empty. Exiting..\n\n"
+              exit 1
+          fi
+      
+      - name: Cat both lists
+        shell: bash
+        run: |
+          echo "Artifactory List"
+          cat artifactory.list
+          echo
+          echo "Stashchart List"
+          cat stashcharts.list
+          echo
+
+      # - name: Update Secrets in Helm values.yaml file
+      #   uses: microsoft/variable-substitution@v1 
+      #   with:
+      #     files: 'cheeseshop-chart/values.yaml'
+      #   env:
+      #     artifactoryAuth: ${{ secrets.ARTIFACTORY_AUTH }}
+
+      # - name: Create Helm Package
+      #   shell: bash
+      #   run: |
+      #     find src/charts/ -type f -name 'Chart.yaml' | sed -r 's|/[^/]+$||' | sort | uniq | xargs -L 1 helm dep up
+      #     for d in src/charts/*/ ; do
+      #         echo "$d"
+      #         helm package "$d" -u -d dest
+      #     done
+
+    

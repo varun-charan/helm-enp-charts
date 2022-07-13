@@ -1,0 +1,27 @@
+deployment:
+  replicas: 1
+
+artifactoryAuth: ""
+
+container:
+  image:
+    repo: dockerdev-enp.bin.cloud.barco.com
+    path: /varun/cheeseshop
+    tag: 1.0.0
+  ports:
+    containerPort: 5050
+  livenessProbe:
+    port: 5050
+  readinessProbe:
+    port: 5050
+  env:
+    PORT: 5050
+
+service:
+  ports:
+    port: 5050
+
+ingress:
+  rules:
+    service:
+      port: 5050 
