@@ -124,53 +124,52 @@ jobs:
       - name: Create Helm Packages
         shell: bash
         run: |
-          while read CHART;
-          do
-              GIT_CHART_NAME=`echo $CHART | cut -f 1 -d ":"`
-              GIT_CHART_VERSION=`echo $CHART | cut -f 2 -d ":"`
-              ART_CHART_NAME=$GIT_CHART_NAME
-              ART_CHART_VERSION=`grep "^${ART_CHART_NAME}:" artifactory.list | cut -f 2 -d ":" `
+          while read CHART; do
+            GIT_CHART_NAME=`echo $CHART | cut -f 1 -d ":"`
+            GIT_CHART_VERSION=`echo $CHART | cut -f 2 -d ":"`
+            ART_CHART_NAME=$GIT_CHART_NAME
+            ART_CHART_VERSION=`grep "^${ART_CHART_NAME}:" artifactory.list | cut -f 2 -d ":" `
 
-              echo "$GIT_CHART_NAME, $GIT_CHART_VERSION, $ART_CHART_NAME and $ART_CHART_VERSION"
+            echo "$GIT_CHART_NAME, $GIT_CHART_VERSION, $ART_CHART_NAME and $ART_CHART_VERSION"
 
-              # if there is no chart in Artifactory, assume 0.0.0 version
-              if [ -z "$ART_CHART_VERSION" ]; then
-                  ART_CHART_VERSION="0.0.0"
-              fi
+            # if there is no chart in Artifactory, assume 0.0.0 version
+            if [ -z "$ART_CHART_VERSION" ]; then
+                ART_CHART_VERSION="0.0.0"
+            fi
 
-              # Build dependencies first if needed
-              if [ -f $GIT_CHART_NAME/requirements.yaml ] || [ -f $GIT_CHART_NAME/Chart.lock ]; then
-                  echo "Building Helm dependency...."
-                  helm dep build $GIT_CHART_NAME
-              fi
+            # Build dependencies first if needed
+            if [ -f $GIT_CHART_NAME/requirements.yaml ] || [ -f $GIT_CHART_NAME/Chart.lock ]; then
+                echo "Building Helm dependency...."
+                helm dep build $GIT_CHART_NAME
+            fi
 
-              # Create helm package
-              echo "Creating Helm package...."
-              helm package $GIT_CHART_NAME
+            # Create helm package
+            echo "Creating Helm package...."
+            helm package $GIT_CHART_NAME
 
-              # Upload to Artifactory
-              printf "\nUploading to Artifactory\n"
+            # Upload to Artifactory
+            printf "\nUploading to Artifactory\n"
 
-              # (artifactory user is hardcoded intentionally)
-              curl --silent --show-error --fail -u ${ARTIFACTORYUSER} \
-                  -T "${GIT_CHART_NAME}-${GIT_CHART_VERSION}.tgz" \
-                  "${HELM_REPO}/${GIT_CHART_NAME}-${GIT_CHART_VERSION}.tgz"
+            # (artifactory user is hardcoded intentionally)
+            curl --silent --show-error --fail -u ${ARTIFACTORYUSER} \
+                -T "${GIT_CHART_NAME}-${GIT_CHART_VERSION}.tgz" \
+                "${HELM_REPO}/${GIT_CHART_NAME}-${GIT_CHART_VERSION}.tgz"
 
-              res=$?
+            res=$?
 
-              if test "$res" != "0"; then
-                  echo "the curl command failed with: $res"
-                  echo "New **Helm** chart CURL upload failed: **${GIT_CHART_NAME}:${GIT_CHART_VERSION}** reason: ${res}"
-                  exit 1
-              fi
+            if test "$res" != "0"; then
+                echo "the curl command failed with: $res"
+                echo "New **Helm** chart CURL upload failed: **${GIT_CHART_NAME}:${GIT_CHART_VERSION}** reason: ${res}"
+                exit 1
+            fi
 
-              echo "New **Helm** chart was released: **${GIT_CHART_NAME}:${GIT_CHART_VERSION}** & uploaded to Artifactory"
+            echo "New **Helm** chart was released: **${GIT_CHART_NAME}:${GIT_CHART_VERSION}** & uploaded to Artifactory"
 
-              # Create a tag
-              # cd ../helm-enp-charts
-              pwd
-              git tag "${GIT_CHART_NAME}/${GIT_CHART_VERSION}" || true
-              cd -
+            # Create a tag
+            # cd ../helm-enp-charts
+            pwd
+            git tag "${GIT_CHART_NAME}/${GIT_CHART_VERSION}" || true
+            cd -
           done < stashcharts.list
 
     
