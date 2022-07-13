@@ -26,40 +26,6 @@ jobs:
         env:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PWD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-
-      - shell: bash
-        run: |
-          pwd
-          ls -la
-          helm repo list
-
-
-  helm-prerequisites:
-    runs-on: ubuntu-latest
-    needs: [setup-infra]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - shell: bash
-        run: |
-          pwd
-          ls -la
-          helm repo list
-
-      # - name: Create a Cache Artifactory List
-      #   id: cache-artifactory-list
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: artifactory-list
-      #     key: ${{ runner.os }}-artifactory-list
-        
-      # - name: Create a Cache Artifactory List
-      #   id: cache-stashcharts-list
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: stashcharts-list
-      #     key: ${{ runner.os }}-stashcharts-list
       
       - name: Get list of charts in Artifactory and helm-enp-charts directory
         shell: bash
