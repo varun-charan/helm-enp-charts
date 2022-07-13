@@ -93,7 +93,7 @@ jobs:
       - name: Update Secrets in Helm values.yaml file
         uses: microsoft/variable-substitution@v1 
         with:
-          files: 'values.yaml'
+          files: 'cheeseshop-charts/values.yaml'
         env:
           artifactoryAuth: ${{ secrets.ARTIFACTORY_AUTH }}
 
