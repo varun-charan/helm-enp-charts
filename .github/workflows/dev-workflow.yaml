@@ -7,7 +7,7 @@ on:
       - hotfix/*
 
 env:
-  HELM_REPO: https://bin.cloud.barco.com/artifactory/helm-enp
+  HELM_REPO: ${{ secrets.HELM_REPO }}
 
 jobs:
   setup-infra:
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Helm Repo
         shell: bash
         run: |
-          helm repo add barco https://bin.cloud.barco.com/artifactory/helm-enp --username=$ARTIFACTORY_USER --password=$ARTIFACTORY_PWD
+          helm repo add my-repo ${{ secrets.HELM_REPO }} --username=$ARTIFACTORY_USER --password=$ARTIFACTORY_PWD
         env:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PWD: ${{ secrets.ARTIFACTORY_PASSWORD }}
@@ -43,7 +43,7 @@ jobs:
           generateList | sort > stashcharts.list
 
           # Get list of charts in Artifactory Helm Repo
-          helm search repo barco/ | awk '{print $1":"$2}' | grep -v NAME | sed "s/barco\///g" | sed 's/[[:blank:]]*$//' | sed "s/\s\+/:/g" | sort > artifactory.list
+          helm search repo my-repo/ | awk '{print $1":"$2}' | grep -v NAME | sed "s/my-repo\///g" | sed 's/[[:blank:]]*$//' | sed "s/\s\+/:/g" | sort > artifactory.list
           
           # Remove garbage from artifactory list if exists
           sed -i '/No:results:found/d' artifactory.list
